@@ -24,7 +24,7 @@ exports.create = async (req, res, next) => {
       });
     }
     await topicModel.create(req.body);
-    res.render('topics/list');
+    res.redirect('/topics');
   } catch (e) {
     next(e);
   }

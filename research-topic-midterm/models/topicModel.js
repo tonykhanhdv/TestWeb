@@ -2,7 +2,18 @@ const db = require('../config/db');
 
 function getAll(keyword = '') {
   return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM topics ORDER BY id DESC', [], (err, rows) =>
+    let sql = 'SELECT * FROM topics';
+    let params = [];
+    if (keyword) {
+      sql += ` WHERE code LIKE ?
+               OR title LIKE ?
+               OR student_name LIKE ?
+               OR field LIKE ?`;
+      const search = `%${keyword}%`;
+      params = [search, search, search, search];
+    }
+    sql += ' ORDER BY id DESC';
+    db.all(sql, params, (err, rows) =>
       err ? reject(err) : resolve(rows)
     );
   });
@@ -31,11 +42,22 @@ function create(data) {
 }
 
 function update(id, data) {
-  return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    db.run(
+      'UPDATE topics SET title=?, student_name=?, field=?, advisor=? WHERE id=?',
+      [data.title, data.student_name, data.field, data.advisor, id],
+      err => err ? reject(err) : resolve()
+    );
+  });
 }
-
 function deleteTopic(id) {
-  return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    db.run(
+      'DELETE FROM topics WHERE id=?',
+      [id],
+      err => err ? reject(err) : resolve()
+    );
+  });
 }
 
 module.exports = { getAll, getById, create, update, deleteTopic };
